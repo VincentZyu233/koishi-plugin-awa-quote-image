@@ -69,7 +69,7 @@ export function apply(ctx: Context, config) {
         return;
       }
 
-      const session_user = await session.bot.getUser(session.userId, session.event.guild.id);
+      const session_user = await session.bot.getUser(session.quote.user.id, session.event.guild.id);
       const avatar_buffer = await ctx.http.file(session_user.avatar);
       const avatar_base64 = Buffer.from(avatar_buffer.data).toString('base64');
 
