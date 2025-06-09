@@ -41,8 +41,8 @@ const defaultTemplate = async (options: {
       }
   
       .avatar {
-        width: 200px;
-        height: 200px;
+        width: 333px;
+        height: 333px;
         margin-left: 40px;
         border-radius: 100px;
         background-image: url(data:image/png;base64,${options.avatarBase64});
@@ -68,7 +68,7 @@ const defaultTemplate = async (options: {
       }
   
       .username {
-        font-size: 36px;
+        font-size: 54px;
         opacity: 0.8;
         text-align: right;
         text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
