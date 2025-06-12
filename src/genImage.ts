@@ -65,6 +65,7 @@ const defaultTemplate = async (options: {
           /* height: ${options.height}px; */
           /* background: url(data:image/png;base64,${options.bgBase64}) no-repeat center center; */
           /* background-size: cover; */
+          background: #000000;
           display: flex;
           align-items: center;
           font-family: 'CustomFont', sans-serif;
