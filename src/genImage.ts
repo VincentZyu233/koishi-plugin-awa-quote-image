@@ -63,8 +63,8 @@ const defaultTemplate = async (options: {
           padding: 0;
           width: ${options.width}px;
           /* height: ${options.height}px; */
-          background: url(data:image/png;base64,${options.bgBase64}) no-repeat center center;
-          background-size: cover;
+          /* background: url(data:image/png;base64,${options.bgBase64}) no-repeat center center; */
+          /* background-size: cover; */
           display: flex;
           align-items: center;
           font-family: 'CustomFont', sans-serif;
@@ -163,7 +163,7 @@ export async function renderQuoteImage(
 
         await browserPage.setContent(html);
         // await browserPage.setViewport({ width: args.width, height: args.height });
-        await browserPage.setViewport({ width: args.width, height: 114514 }); // 足够大就好
+        await browserPage.setViewport({ width: args.width, height: 9999 }); // 足够大就好
 
         // const res = await browserPage.screenshot({
         //     encoding: 'base64',
