@@ -171,7 +171,7 @@ export async function renderQuoteImage(
                 html = await getOriginBlackWhiteTemplateStr(templateOptions);
         }
 
-        writeFileSync(path.join(__dirname, 'tmp.html'), html);
+        // writeFileSync(path.join(__dirname, 'tmp.html'), html);
 
         browserPage.on('console', msg => {
             ctx.logger.debug(`Puppeteer console: ${msg.text()}`);

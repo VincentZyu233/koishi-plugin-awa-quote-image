@@ -16,3 +16,7 @@ tsconfig.tsbuildinfo
 *.ntvs*
 *.njsproj
 *.sln
+
+# Temporary files
+src/tmp.html
+
