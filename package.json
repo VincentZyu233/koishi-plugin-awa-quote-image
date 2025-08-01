@@ -1,7 +1,7 @@
 {
-  "name": "koishi-plugin-awa-quote",
+  "name": "koishi-plugin-awa-quote-image",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.1.0-alpha.1+20250801",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -9,6 +9,11 @@
     "dist"
   ],
   "license": "MIT",
+  "homepage": "https://github.com/VincentZyu233/koishi-plugin-awa-quote-image",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitee.com/vincent-zyu/koishi-plugin-awa-quote-image"
+  },
   "keywords": [
     "chatbot",
     "koishi",
@@ -16,5 +21,17 @@
   ],
   "peerDependencies": {
     "koishi": "^4.18.7"
+  },
+  "koishi": {
+    "description": {
+      "en": "Render group messages as images.",
+      "zh": "把群u的名人名言 发言 渲染成图片"
+    },
+    "service": {
+      "required": [
+        "puppeteer",
+        "http"
+      ]
+    }
   }
 }
