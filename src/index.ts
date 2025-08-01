@@ -194,6 +194,7 @@ export function apply(ctx: Context, config: any) {
         "回复/引用某个群u说的话, 制作名人名言图片"
     )
         .option("imageStyleIdx", "-i, --index, --idx <idx:number> 图片样式索引")
+        .option("enableDarkMode", "-d, --dark, --darkMode <enableDarkMode:string> 启用深色模式")
         .option("verbose", "-v, --verbose 在session和console打印详细参数信息")
         .action(async ({ session, options }) => {
             try{
@@ -208,8 +209,10 @@ export function apply(ctx: Context, config: any) {
         });
 
     async function do_aqt( {session, options} ){
-        if (!session.quote)
-            return `${config.enableQuote ? h.quote(session.messageId) : ''}请先回复/引用一条消息。`;
+        if (!session.quote){
+            await session.send(`${config.enableQuote ? h.quote(session.messageId) : ''}请先回复/引用一条消息。`);
+            return;
+        }
 
         const waitingHintMsgId = await session.send(`${config.enableQuote ? h.quote(session.messageId) : ''}渲染中，请等待...`);
 
@@ -249,6 +252,16 @@ export function apply(ctx: Context, config: any) {
             }
         }
 
+        let selectedEnableDarkMode = selectedStyleDetailObj.darkMode;
+        if ( options.enableDarkMode !== undefined ) {
+            // ctx.logger.info(`options.enableDarkMode = ${options.enableDarkMode}`);
+            if ( options.enableDarkMode.toLowerCase() === 'true')
+                selectedEnableDarkMode = true;
+            if ( options.enableDarkMode.toLowerCase() === 'false')
+                selectedEnableDarkMode = false;
+        }
+
+
         const session_user_obj = await session.bot.getUser(session.quote.user.id, session.quote.guild.id);
         const avatar_buffer = await ctx.http.file(session_user_obj.avatar);
         const avatar_base64 = Buffer.from(avatar_buffer.data).toString('base64');
@@ -263,6 +276,7 @@ export function apply(ctx: Context, config: any) {
         const argMsgArr = [
             `${PLUGIN_NAME} 参数信息`,
             `\t 选中的图片样式细节: ${JSON.stringify(selectedStyleDetailObj)}`,
+            `\t 选中的是否黑暗模式: ${selectedEnableDarkMode}`,
             `\t 用户名：${session_user_obj.name} ${config.addOnebotGroupCard ? `(${onebot_groupcard})` : ''}`,
             `\t 引用消息内容：${session.quote.content.slice(0, 100)}...`,
             `\t 用户头像：${h.image(session_user_obj.avatar)}`,
@@ -279,7 +293,7 @@ export function apply(ctx: Context, config: any) {
             {
                 sentence: session.quote.content,                username: session_user_obj.name,                        avatarBase64: avatar_base64,
                 width: config.imageWidth,                       minHeight: config.imageMinHeight,
-                selectedStyle: selectedStyleDetailObj.styleKey, fontBase64: font_base64,                                enableDarkMode: selectedStyleDetailObj.darkMode,
+                selectedStyle: selectedStyleDetailObj.styleKey, fontBase64: font_base64,                                enableDarkMode: selectedEnableDarkMode,
                 imageType: config.imageType,                    pageScreenshotquality: config.PageScreenshotquality,
             }
         );
