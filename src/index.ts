@@ -193,8 +193,8 @@ export function apply(ctx: Context, config: any) {
         config.aqtCommandName,
         "回复/引用某个群u说的话, 制作名人名言图片"
     )
-        .option("imageStyleIdx", "-i, --index, --idx <idx:number> 图片样式索引")
-        .option("enableDarkMode", "-d, --dark, --darkMode <enableDarkMode:string> 启用深色模式")
+        .option("imageStyleIdx", "-i, --idx, --index <idx:number> 图片样式索引")
+        .option("enableDarkMode", "-d, --dark, --darkmode <enableDarkMode:string> 启用深色模式")
         .option("verbose", "-v, --verbose 在session和console打印详细参数信息")
         .action(async ({ session, options }) => {
             try{
@@ -263,21 +263,23 @@ export function apply(ctx: Context, config: any) {
 
 
         const session_user_obj = await session.bot.getUser(session.quote.user.id, session.quote.guild.id);
+        let usernameArg = session_user_obj.name;
+        if ( config.addOnebotGroupCard && session.onebot ){
+            const onebot_groupmember_obj = await session.onebot.getGroupMemberInfo(session.quote.guild.id, session.quote.user.id);
+            const onebot_groupcard = onebot_groupmember_obj.card;
+            if ( onebot_groupcard && onebot_groupcard.length > 0 )
+                usernameArg += `(${onebot_groupcard})`;
+        }
+
         const avatar_buffer = await ctx.http.file(session_user_obj.avatar);
         const avatar_base64 = Buffer.from(avatar_buffer.data).toString('base64');
         const font_base64 = await fileToBase64(selectedStyleDetailObj.fontPath);
-
-        let onebot_groupcard;
-        if ( config.addOnebotGroupCard ){
-            const onebot_groupmember_obj = await session.onebot.getGroupMemberInfo(session.quote.guild.id, session.quote.user.id);
-            onebot_groupcard = onebot_groupmember_obj.card;
-        }
 
         const argMsgArr = [
             `${PLUGIN_NAME} 参数信息`,
             `\t 选中的图片样式细节: ${JSON.stringify(selectedStyleDetailObj)}`,
             `\t 选中的是否黑暗模式: ${selectedEnableDarkMode}`,
-            `\t 用户名：${session_user_obj.name} ${config.addOnebotGroupCard ? `(${onebot_groupcard})` : ''}`,
+            `\t 用户名：${usernameArg}`,
             `\t 引用消息内容：${session.quote.content.slice(0, 100)}...`,
             `\t 用户头像：${h.image(session_user_obj.avatar)}`,
         ];
@@ -291,7 +293,7 @@ export function apply(ctx: Context, config: any) {
         const res = await renderQuoteImage(
             ctx,
             {
-                sentence: session.quote.content,                username: session_user_obj.name,                        avatarBase64: avatar_base64,
+                sentence: session.quote.content,                username: usernameArg,                                  avatarBase64: avatar_base64,
                 width: config.imageWidth,                       minHeight: config.imageMinHeight,
                 selectedStyle: selectedStyleDetailObj.styleKey, fontBase64: font_base64,                                enableDarkMode: selectedEnableDarkMode,
                 imageType: config.imageType,                    pageScreenshotquality: config.PageScreenshotquality,
