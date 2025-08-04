@@ -1,0 +1,7 @@
+# 忽略字体文件以减少包大小
+
+assets/*.ttf
+assets/*.otf
+
+*.tsbuildinfo
+

@@ -20,3 +20,7 @@ tsconfig.tsbuildinfo
 # Temporary files
 src/tmp.html
 
+# Font files
+assets/*.ttf
+assets/*.otf
+

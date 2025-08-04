@@ -1,7 +1,7 @@
-import { Context, h, Schema } from 'koishi';
-import path from 'node:path';
-import { readFile } from 'fs/promises';
-import { readFileSync } from 'fs'
+import { Context, h, Schema } from 'koishi'
+import path from 'path'
+import { readFile, writeFile, mkdir } from 'fs/promises'
+import { readFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
 
 import {} from 'koishi-plugin-adapter-onebot';
@@ -22,34 +22,43 @@ const pkg = JSON.parse(
 
 
 export const usage = `
-<h1>Koishi 插件: 群u的名人名言 ${PLUGIN_NAME}</h1>
+<h1>🎭 Koishi 插件: 群u的名人名言 ${PLUGIN_NAME} 🎭</h1>
 <h2>🎯 插件版本：v${pkg.version}</h2>
-<p>插件使用问题 / Bug反馈 / 插件开发交流，欢迎加入QQ群：<b>259248174</b></p>
+<p>💬 插件使用问题 / 🐛 Bug反馈 / 👨‍💻 插件开发交流，欢迎加入QQ群：<b>259248174</b> 🎉</p>
 
 <hr>
 
 <p>📦 插件仓库地址：</p>
 <ul>
-  <li><a href="https://gitee.com/vincent-zyu/koishi-plugin-awa-quote-image">https://gitee.com/vincent-zyu/koishi-plugin-awa-quote-image</a></li>
-  <li><a href="https://github.com/VincentZyu233/koishi-plugin-awa-quote-image">https://github.com/VincentZyu233/koishi-plugin-awa-quote-image</a></li>
+  <li>🟠 <a href="https://gitee.com/vincent-zyu/koishi-plugin-awa-quote-image">https://gitee.com/vincent-zyu/koishi-plugin-awa-quote-image</a></li>
+  <li>⚫ <a href="https://github.com/VincentZyu233/koishi-plugin-awa-quote-image">https://github.com/VincentZyu233/koishi-plugin-awa-quote-image</a></li>
 </ul>
 
 <hr>
 
-<h3>字体使用声明</h3>
+<h3>🎨 字体使用声明</h3>
 <p>本插件使用以下开源字体进行图像渲染：</p>
 <ul>
-  <li><b>思源宋体（Source Han Serif SC）</b> - 由 Adobe 与 Google 联合开发，遵循 <a href="https://openfontlicense.org">SIL Open Font License 1.1</a> 协议。</li>
-  <li><b>霞鹜文楷（LXGW WenKai）</b> - 由 LXGW 开发并维护，遵循 <a href="https://openfontlicense.org">SIL Open Font License 1.1</a> 协议。</li>
+  <li>📝 <b>思源宋体（Source Han Serif SC）</b> - 由 Adobe 与 Google 联合开发，遵循 <a href="https://openfontlicense.org">SIL Open Font License 1.1</a> 协议。</li>
+  <li>✍️ <b>霞鹜文楷（LXGW WenKai）</b> - 由 LXGW 开发并维护，遵循 <a href="https://openfontlicense.org">SIL Open Font License 1.1</a> 协议。</li>
 </ul>
-<p>两者均为自由字体，可在本项目中自由使用、修改与发布。若你也在开发相关插件或项目，欢迎一同使用这些优秀的字体。</p>
+<p>🆓 两者均为自由字体，可在本项目中自由使用、修改与发布。若你也在开发相关插件或项目，欢迎一同使用这些优秀的字体。✨</p>
+
+
+<h3>📥 字体文件获取说明</h3>
+<p>🤖 插件会在首次使用时自动下载所需字体文件。如果自动下载失败，请手动下载字体文件：</p>
+<ul>
+  <li>🔗 字体下载地址：<a href="https://gitee.com/vincent-zyu/koishi-plugin-awa-quote-image/releases/tag/fonts">https://gitee.com/vincent-zyu/koishi-plugin-awa-quote-image/releases/tag/fonts</a></li>
+  <li>📁 下载后请将字体文件放入插件的 <code>assets</code> 文件夹中</li>
+  <li>📋 需要的字体文件：<code>SourceHanSerifSC-SemiBold.otf</code> 和 <code>LXGWWenKaiMono-Regular.ttf</code></li>
+</ul>
 
 <hr>
 
-<h3>插件许可声明</h3>
-<p>本插件为开源免费项目，基于 MIT 协议开放。欢迎修改、分发、二创。</p>
-<p>如果你觉得插件好用，欢迎在 GitHub 上 Star 或通过其他方式给予支持（例如提供服务器、API Key 或直接赞助）！</p>
-<p>感谢所有开源字体与项目的贡献者 ❤️</p>
+<h3>📜 插件许可声明</h3>
+<p>🆓 本插件为开源免费项目，基于 MIT 协议开放。欢迎修改、分发、二创。🎉</p>
+<p>⭐ 如果你觉得插件好用，欢迎在 GitHub 上 Star 或通过其他方式给予支持（例如提供服务器、API Key 或直接赞助）！💖</p>
+<p>🙏 感谢所有开源字体与项目的贡献者 ❤️</p>
 `
 
 export interface ImageStyleDetail {
@@ -159,7 +168,7 @@ export const Config = Schema.intersect([
             .role('slider')
             .min(0).max(100).step(0.1)
             .default(60)
-            .description("Puppeteer截图质量参数, 图片压缩质量, 范围[0, 100]")
+            .description("Puppeteer截图质量参数, 图片压缩质量, 范围[0, 100], 对png无效")
     })
         .description("quote图片相关配置"),
     Schema.object({
@@ -177,6 +186,79 @@ export function apply(ctx: Context, config: any) {
     const IMAGE_STYLE_VALUES = Object.values(IMAGE_STYLES);
     const IMAGE_STYLE_KEYS = Object.keys(IMAGE_STYLES) as ImageStyleKey[];
 
+    // 检查字体文件并下载
+    async function checkAndDownloadFonts() {
+        const assetsDir = path.resolve(__dirname, '../assets');
+        const sourceHanSerifPath = path.join(assetsDir, 'SourceHanSerifSC-SemiBold.otf');
+        const lxgwWenKaiPath = path.join(assetsDir, 'LXGWWenKaiMono-Regular.ttf');
+        
+        const sourceHanSerifExists = existsSync(sourceHanSerifPath);
+        const lxgwWenKaiExists = existsSync(lxgwWenKaiPath);
+        
+        if (sourceHanSerifExists && lxgwWenKaiExists) {
+            ctx.logger.info(`[${PLUGIN_NAME}] 字体文件已存在，跳过下载`);
+            return true;
+        }
+        
+        ctx.logger.info(`[${PLUGIN_NAME}] 开始下载字体文件...`);
+        
+        // 确保assets目录存在
+        try {
+            await mkdir(assetsDir, { recursive: true });
+        } catch (error) {
+            ctx.logger.error(`[${PLUGIN_NAME}] 创建assets目录失败: ${error}`);
+            return false;
+        }
+        
+        const downloadPromises = [];
+        
+        if (!sourceHanSerifExists) {
+            ctx.logger.info(`[${PLUGIN_NAME}] 下载 SourceHanSerifSC-SemiBold.otf...`);
+            const downloadPromise = downloadFont(
+                'http://gitee.com/vincent-zyu/koishi-plugin-awa-quote-image/releases/download/fonts/SourceHanSerifSC-SemiBold.otf',
+                sourceHanSerifPath
+            );
+            downloadPromises.push(downloadPromise);
+        }
+        
+        if (!lxgwWenKaiExists) {
+            ctx.logger.info(`[${PLUGIN_NAME}] 下载 LXGWWenKaiMono-Regular.ttf...`);
+            const downloadPromise = downloadFont(
+                'http://gitee.com/vincent-zyu/koishi-plugin-awa-quote-image/releases/download/fonts/LXGWWenKaiMono-Regular.ttf',
+                lxgwWenKaiPath
+            );
+            downloadPromises.push(downloadPromise);
+        }
+        
+        try {
+            await Promise.all(downloadPromises);
+            ctx.logger.info(`[${PLUGIN_NAME}] 字体文件下载完成`);
+            return true;
+        } catch (error) {
+            ctx.logger.error(`[${PLUGIN_NAME}] 字体文件下载失败: ${error}`);
+            return false;
+        }
+    }
+
+    // 使用ctx.http下载字体文件（简单模式）
+    async function downloadFont(url: string, filePath: string): Promise<void> {
+        const fileName = path.basename(filePath);
+        
+        try {
+            ctx.logger.info(`[${PLUGIN_NAME}] 开始下载字体文件: ${fileName}`);
+            const response = await ctx.http.get(url, { 
+                responseType: 'arraybuffer',
+                timeout: 60000 // 60秒超时
+            });
+            await writeFile(filePath, Buffer.from(response));
+            ctx.logger.info(`[${PLUGIN_NAME}] 字体文件下载成功: ${fileName} ✓`);
+        } catch (error) {
+            ctx.logger.error(`[${PLUGIN_NAME}] 字体文件下载失败 ${fileName}: ${error}`);
+            throw error;
+        }
+    }
+
+    // 立即注册 acs 指令
     ctx.command(
         config.acsCommandName,
         "查看图片样式列表"
@@ -189,24 +271,32 @@ export function apply(ctx: Context, config: any) {
             await session.send(msg);
         });
 
-    ctx.command(
-        config.aqtCommandName,
-        "回复/引用某个群u说的话, 制作名人名言图片"
-    )
-        .option("imageStyleIdx", "-i, --idx, --index <idx:number> 图片样式索引")
-        .option("enableDarkMode", "-d, --dark, --darkmode <enableDarkMode:string> 启用深色模式")
-        .option("verbose", "-v, --verbose 在session和console打印详细参数信息")
-        .action(async ({ session, options }) => {
-            try{
-                do_aqt({session, options});
-            } catch (error) {
-                let errorMsg = `渲染群u名人名言失败。\n\t error = ${error}`;
-                if ( config.verboseSessionLog || options.verbose )
-                    await session.send(errorMsg);
-                if ( config.verboseConsoleLog || options.verbose )
-                    ctx.logger.info(errorMsg);
-            }
-        });
+    // 异步检查字体文件并注册 aqt 指令
+    checkAndDownloadFonts().then((success) => {
+        if (success) {
+            ctx.command(
+                config.aqtCommandName,
+                "回复/引用某个群u说的话, 制作名人名言图片"
+            )
+                .option("imageStyleIdx", "-i, --idx, --index <idx:number> 图片样式索引")
+                .option("enableDarkMode", "-d, --dark, --darkmode <enableDarkMode:string> 启用深色模式")
+                .option("verbose", "-v, --verbose 在session和console打印详细参数信息")
+                .action(async ({ session, options }) => {
+                    try{
+                        do_aqt({session, options});
+                    } catch (error) {
+                        let errorMsg = `渲染群u名人名言失败。\n\t error = ${error}`;
+                        if ( config.verboseSessionLog || options.verbose )
+                            await session.send(errorMsg);
+                        if ( config.verboseConsoleLog || options.verbose )
+                            ctx.logger.info(errorMsg);
+                    }
+                });
+            ctx.logger.info(`[${PLUGIN_NAME}] aqt 指令注册完成`);
+        } else {
+            ctx.logger.warn(`[${PLUGIN_NAME}] 字体文件不可用，aqt 指令未注册`);
+        }
+    });
 
     async function do_aqt( {session, options} ){
         if (!session.quote){
